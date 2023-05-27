@@ -1,105 +1,65 @@
-dashes = '---------'
-cells = dashes + '\n' + ('|' + ' ' * 7 + '|\n') * 3 + dashes
-occupied_initial = dict()
-field_layout = '_________'
-x_turn = True
+# Tic-Tac-Toe Game
 
+# Create an empty 3x3 grid
+board = [[' ' for _ in range(3)] for _ in range(3)]
 
-def outline_fields(string_to_process):
-    print(dashes)
-    for i in range(3):
-        print(('| ' + ' '.join([i for i in string_to_process[i*3:(i+1)*3]]) + ' |').replace('_', ' '))
-    print(dashes)
+# Function to print the current state of the board
+def print_board():
+    for row in board:
+        print('|'.join(row))
+        print('-' * 5)
 
-
-for row in range(1, 4):
-    for column in range(1, 4):
-        if field_layout[(row - 1) * 3 + column - 1] != '_':
-            occupied_initial[f'{row}{column}'] = 'Occupied'
-        else:
-            occupied_initial[f'{row}{column}'] = 'UNoccupied'
-
-
-def analyze_the_game_state(correct_inp):
-    if correct_inp[0] == correct_inp[3] == correct_inp[6] and correct_inp[1] == correct_inp[4] == correct_inp[7]\
-            and correct_inp[0] in 'XO':
-        print('Impossible')
+# Function to check if a player has won
+def check_win(player):
+    # Check rows
+    for row in board:
+        if all(cell == player for cell in row):
+            return True
+    # Check columns
+    for col in range(3):
+        if all(row[col] == player for row in board):
+            return True
+    # Check diagonals
+    if board[0][0] == board[1][1] == board[2][2] == player:
         return True
-    elif correct_inp[0] == correct_inp[3] == correct_inp[6] and correct_inp[0] in 'XO':
-        print(correct_inp[0], 'wins')
+    if board[0][2] == board[1][1] == board[2][0] == player:
         return True
-    elif correct_inp[1] == correct_inp[4] == correct_inp[7] and correct_inp[1] in 'XO':
-        print(correct_inp[1], 'wins')
-        return True
-    elif correct_inp[2] == correct_inp[5] == correct_inp[8] and correct_inp[2] in 'XO':
-        print(correct_inp[2], 'wins')
-        return True
-    elif correct_inp[0] == correct_inp[4] == correct_inp[8] and correct_inp[0] in 'XO':
-        print(correct_inp[0], 'wins')
-        return True
-    elif correct_inp[2] == correct_inp[4] == correct_inp[6] and correct_inp[2] in 'XO':
-        print(correct_inp[2], 'wins')
-        return True
-    elif correct_inp[0] == correct_inp[1] == correct_inp[2] and correct_inp[0] in 'XO':
-        print(correct_inp[0], 'wins')
-        return True
-    elif correct_inp[3] == correct_inp[4] == correct_inp[5] and correct_inp[3] in 'XO':
-        print(correct_inp[3], 'wins')
-        return True
-    elif correct_inp[6] == correct_inp[7] == correct_inp[8] and correct_inp[6] in 'XO':
-        print(correct_inp[6], 'wins')
-        return True
-    elif correct_inp.count('X') - correct_inp.count('O') > 1:
-        print('''elif correct_inp.count('X') - correct_inp.count('O') > 1:''')
-        print('Impossible')
-    elif correct_inp.count('O') > correct_inp.count('X'):
-        print('''elif correct_inp.count('O') > correct_inp.count('X'):''')
-        print('Impossible')
-    elif '_' in correct_inp:
-        print('Game not finished')
-    else:
-        print('Draw')
-        return True
+    return False
 
+# Function to play the game
+def play_game():
+    current_player = 'X'
+    print("Let's play Tic-Tac-Toe!")
+    print_board()
+    
+    while True:
+        # Get player input
+        row = int(input("Enter the row number (0-2): "))
+        col = int(input("Enter the column number (0-2): "))
+        
+        # Validate the input
+        if row < 0 or row > 2 or col < 0 or col > 2 or board[row][col] != ' ':
+            print("Invalid move. Try again.")
+            continue
+        
+        # Make the move
+        board[row][col] = current_player
+        
+        # Print the updated board
+        print_board()
+        
+        # Check if the current player has won
+        if check_win(current_player):
+            print(f"Player {current_player} wins!")
+            break
+        
+        # Check if it's a tie
+        if all(cell != ' ' for row in board for cell in row):
+            print("It's a tie!")
+            break
+        
+        # Switch to the other player
+        current_player = 'O' if current_player == 'X' else 'X'
 
-def enter_coordinates(field_layout_now, occupied, _x_turn):
-    coordinates = input('Enter the coordinates: ')
-    if len(coordinates) == 3:
-        for i in coordinates.split():
-            if not i.isdigit():
-                print('You should enter numbers!')
-                enter_coordinates(field_layout_now, occupied, _x_turn)
-                break
-            elif int(i) > 3:
-                print('Coordinates should be from 1 to 3!')
-                enter_coordinates(field_layout_now, occupied, _x_turn)
-                break
-        else:
-            if occupied.get(''.join(coordinates.split())) == 'Occupied':
-                print('This cell is occupied! Choose another one!')
-                enter_coordinates(field_layout_now, occupied, _x_turn)
-            else:
-                print('coordinates', coordinates)
-                _row = int(coordinates.split()[0])
-                _column = int(coordinates.split()[1])
-                list_correct_inp = list(field_layout_now)
-                index_of_what_to_change = (_row - 1) * 3 + _column - 1
-                if index_of_what_to_change < 9:
-                    print(_x_turn)
-                    list_correct_inp[index_of_what_to_change] = 'X' if _x_turn is True else 'O'
-                    new_field_layout = ''.join(list_correct_inp)
-                    print(new_field_layout)
-                    occupied[''.join(coordinates.split())] = 'Occupied'
-                    outline_fields(new_field_layout)
-                    _x_turn = False if _x_turn is True else True
-
-                    if analyze_the_game_state(new_field_layout) is True:
-                        pass
-                    else:
-                        enter_coordinates(new_field_layout, occupied, _x_turn)
-    else:
-        enter_coordinates(field_layout_now, occupied, _x_turn)
-
-
-outline_fields(field_layout)
-enter_coordinates(field_layout, occupied_initial, x_turn)
+# Start the game
+play_game()
